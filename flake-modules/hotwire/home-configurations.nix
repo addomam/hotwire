@@ -44,7 +44,7 @@ in {
       hotwire.homeConfigurations.globalModules = lib.mkMerge [
         cfg.extraModules
         (lib.mkIf cfg.importSelfModules (builtins.attrValues config.flake.homeModules))
-        (lib.mkIf cfg.overlaySelfPackages ([{nixpkgs.overlays = [config.flake.overlays.packages];}]))
+        (lib.mkIf cfg.overlaySelfPackages [{nixpkgs.overlays = [config.flake.overlays.packages];}])
       ];
 
       flake.homeConfigurations = builtins.mapAttrs (_: file:

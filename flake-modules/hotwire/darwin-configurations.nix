@@ -44,7 +44,7 @@ in {
       hotwire.darwinConfigurations.globalModules = lib.mkMerge [
         cfg.extraModules
         (lib.mkIf cfg.importSelfModules (builtins.attrValues config.flake.darwinModules))
-        (lib.mkIf cfg.overlaySelfPackages ([{nixpkgs.overlays = [config.flake.overlays.packages];}]))
+        (lib.mkIf cfg.overlaySelfPackages [{nixpkgs.overlays = [config.flake.overlays.packages];}])
       ];
 
       flake.darwinConfigurations = builtins.mapAttrs (_: file:

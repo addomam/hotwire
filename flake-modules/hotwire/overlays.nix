@@ -26,7 +26,8 @@ in {
           builtins.mapAttrs (_: import)
           (hotwireLib.nixFiles (config.hotwire.basePath + "/overlays"));
       }
-      /* # For some reason this causes infinite recursion in NixOS configurations but the other implementation doesn't
+      /*
+         For some reason this causes infinite recursion in NixOS configurations but the other implementation doesn't
       (lib.mkIf cfg.generatePackagesOverlay {
         flake.overlays.packages = (_: prev:
           config.flake.packages."${prev.system}"
@@ -34,10 +35,11 @@ in {
       })
       */
       (lib.mkIf cfg.generatePackagesOverlay {
-        flake.overlays.packages = (final: _:
-          builtins.mapAttrs
-          (name: file: final.callPackage file {})
-          (hotwireLib.nixFiles (config.hotwire.basePath + "/packages"))
+        flake.overlays.packages = (
+          final: _:
+            builtins.mapAttrs
+            (_name: file: final.callPackage file {})
+            (hotwireLib.nixFiles (config.hotwire.basePath + "/packages"))
         );
       })
     ]))

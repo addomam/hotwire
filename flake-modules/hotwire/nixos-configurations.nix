@@ -43,7 +43,7 @@ in {
       hotwire.nixosConfigurations.globalModules = lib.mkMerge [
         cfg.extraModules
         (lib.mkIf cfg.importSelfModules (builtins.attrValues config.flake.nixosModules))
-        (lib.mkIf cfg.overlaySelfPackages ([{nixpkgs.overlays = [config.flake.overlays.packages];}]))
+        (lib.mkIf cfg.overlaySelfPackages [{nixpkgs.overlays = [config.flake.overlays.packages];}])
       ];
 
       flake.nixosConfigurations = builtins.mapAttrs (_: file:
