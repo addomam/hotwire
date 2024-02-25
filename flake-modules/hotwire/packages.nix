@@ -19,7 +19,7 @@ in {
       }: {
         packages =
           builtins.mapAttrs
-          (name: file: pkgs.callPackage file (builtins.removeAttrs self'.packages [name]))
+          (_name: file: lib.callPackageWith (pkgs // self'.packages) file {})
           (hotwireLib.nixFiles (config.hotwire.basePath + "/packages"));
       };
     })
