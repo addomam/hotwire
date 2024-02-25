@@ -142,7 +142,7 @@ Here is an overview of current progress:
 
 ### `.#lib`
 
-- Looks in the `lib` directory
+- Looks for a file named `lib.nix` or `lib/default.nix`
 - Expects the files to be a function with one named argument: `lib`
   - This format was chosen since it's simple enough and is the way upstream Nixpkgs lib is structured
 

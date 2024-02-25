@@ -2,9 +2,7 @@
   config,
   lib,
   ...
-}: let
-  hotwireLib = import ./../../lib.nix {inherit lib;};
-in {
+}: {
   options.hotwire.lib.enable = lib.mkEnableOption "hotwire lib";
 
   config = lib.mkMerge [
@@ -12,10 +10,19 @@ in {
       hotwire.lib.enable = lib.mkDefault true;
     })
     (lib.mkIf config.hotwire.lib.enable {
-      flake.lib =
-        builtins.mapAttrs
-        (_: file: import file {inherit lib;})
-        (hotwireLib.nixFiles (config.hotwire.basePath + "/lib"));
+      flake = let
+        dirPath = config.hotwire.basePath + "/lib";
+        filePath = config.hotwire.basePath + "/lib.nix";
+        libPath =
+          if builtins.pathExists dirPath
+          then dirPath
+          else if builtins.pathExists filePath
+          then filePath
+          else null;
+      in
+        lib.mkIf (libPath != null) {
+          lib = import libPath {inherit lib;};
+        };
     })
   ];
 }
