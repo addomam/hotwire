@@ -39,6 +39,10 @@
             path = ./templates/minimal;
             description = "A minimal template utilizing hotwire.";
           };
+          example = {
+            path = ./templates/example;
+            description = "An example exercising most of hotwire's features.";
+          };
         };
       };
 
