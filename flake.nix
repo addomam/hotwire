@@ -34,6 +34,12 @@
 
           default = hotwire;
         };
+        templates = {
+          minimal = {
+            path = ./templates/minimal;
+            description = "A minimal template utilizing hotwire.";
+          };
+        };
       };
 
       systems = [
