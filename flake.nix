@@ -22,6 +22,7 @@
       imports = [
         inputs.treefmt.flakeModule
         flakeParts.flakeModules.flakeModules
+        ./checks.nix
       ];
 
       flake = {lib, ...}: {
