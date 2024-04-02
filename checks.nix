@@ -32,5 +32,6 @@
 in {
   flake.checks = {
     x86_64-darwin.system = exampleFlake.darwinConfigurations.intel.system;
+    aarch64-darwin.system = exampleFlake.darwinConfigurations.intel.system;
   };
 }
