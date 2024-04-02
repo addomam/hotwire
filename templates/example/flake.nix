@@ -21,7 +21,7 @@
     hotwire,
     ...
   }:
-    flakeParts.lib.mkFlake {inherit inputs;} ({ ...}: {
+    flakeParts.lib.mkFlake {inherit inputs;} ({...}: {
       imports = [
         hotwire.flakeModules.hotwire
         hotwire.flakeModules.darwinOutputs
