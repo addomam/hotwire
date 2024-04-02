@@ -1,16 +1,15 @@
-/*
-Flake.Parts modules for nix-darwin.
-*/
+# Flake.Parts modules for nix-darwin.
 {
   lib,
   flake-parts-lib,
   moduleLocation,
   ...
-}: {
+}:
+{
   options.flake = flake-parts-lib.mkSubmoduleOptions {
     darwinConfigurations = lib.mkOption {
       type = lib.types.lazyAttrsOf lib.types.raw;
-      default = {};
+      default = { };
       description = ''
         Instantiated Darwin configurations. Used by `darwin-rebuild`.
 
@@ -34,11 +33,13 @@ Flake.Parts modules for nix-darwin.
 
     darwinModules = lib.mkOption {
       type = lib.types.lazyAttrsOf lib.types.unspecified;
-      default = {};
-      apply = lib.mapAttrs (k: v: {
-        _file = "${builtins.toString moduleLocation}#darwinModules.${k}";
-        imports = [v];
-      });
+      default = { };
+      apply = lib.mapAttrs (
+        k: v: {
+          _file = "${builtins.toString moduleLocation}#darwinModules.${k}";
+          imports = [ v ];
+        }
+      );
       description = ''
         Darwin modules.
 

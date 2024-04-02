@@ -1,10 +1,7 @@
-{
-  writeShellApplication,
-  dependency,
-}:
+{ writeShellApplication, dependency }:
 writeShellApplication {
   name = "dependent";
-  runtimeInputs = [dependency];
+  runtimeInputs = [ dependency ];
   text = ''
     echo "This is dependent."
     echo "We will now run dependency."

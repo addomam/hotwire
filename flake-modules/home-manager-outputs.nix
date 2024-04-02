@@ -1,16 +1,15 @@
-/*
-Flake.Parts modules for Home Manager
-*/
+# Flake.Parts modules for Home Manager
 {
   lib,
   flake-parts-lib,
   moduleLocation,
   ...
-}: {
+}:
+{
   options.flake = flake-parts-lib.mkSubmoduleOptions {
     homeConfigurations = lib.mkOption {
       type = lib.types.lazyAttrsOf lib.types.raw;
-      default = {};
+      default = { };
       description = ''
         Instantiated Home Manager configurations. Used by `home-manager`.
 
@@ -34,11 +33,13 @@ Flake.Parts modules for Home Manager
 
     homeModules = lib.mkOption {
       type = lib.types.lazyAttrsOf lib.types.unspecified;
-      default = {};
-      apply = lib.mapAttrs (k: v: {
-        _file = "${builtins.toString moduleLocation}#homeModules.${k}";
-        imports = [v];
-      });
+      default = { };
+      apply = lib.mapAttrs (
+        k: v: {
+          _file = "${builtins.toString moduleLocation}#homeModules.${k}";
+          imports = [ v ];
+        }
+      );
       description = ''
         Home Manager modules.
 

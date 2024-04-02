@@ -1,8 +1,5 @@
+{ lib, self, ... }:
 {
-  lib,
-  self,
-  ...
-}: {
   imports = [
     ./apps.nix
     ./darwin-configurations.nix

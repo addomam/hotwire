@@ -17,35 +17,38 @@
     treefmt.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = inputs @ {flakeParts, ...}:
-    flakeParts.lib.mkFlake {inherit inputs;} {
+  outputs =
+    inputs@{ flakeParts, ... }:
+    flakeParts.lib.mkFlake { inherit inputs; } {
       imports = [
         inputs.treefmt.flakeModule
         flakeParts.flakeModules.flakeModules
         ./checks.nix
       ];
 
-      flake = {lib, ...}: {
-        lib = import ./lib.nix {inherit lib;};
-        flakeModules = rec {
-          hotwire = ./flake-modules/hotwire;
+      flake =
+        { lib, ... }:
+        {
+          lib = import ./lib.nix { inherit lib; };
+          flakeModules = rec {
+            hotwire = ./flake-modules/hotwire;
 
-          darwinOutputs = ./flake-modules/darwin-outputs.nix;
-          homeManagerOutputs = ./flake-modules/home-manager-outputs.nix;
+            darwinOutputs = ./flake-modules/darwin-outputs.nix;
+            homeManagerOutputs = ./flake-modules/home-manager-outputs.nix;
 
-          default = hotwire;
-        };
-        templates = {
-          minimal = {
-            path = ./templates/minimal;
-            description = "A minimal template utilizing hotwire.";
+            default = hotwire;
           };
-          example = {
-            path = ./templates/example;
-            description = "An example exercising most of hotwire's features.";
+          templates = {
+            minimal = {
+              path = ./templates/minimal;
+              description = "A minimal template utilizing hotwire.";
+            };
+            example = {
+              path = ./templates/example;
+              description = "An example exercising most of hotwire's features.";
+            };
           };
         };
-      };
 
       systems = [
         "x86_64-linux"
@@ -54,14 +57,18 @@
         "aarch64-darwin"
       ];
 
-      perSystem = {...}: {
-        treefmt = {
-          projectRootFile = "flake.nix";
+      perSystem =
+        { pkgs, ... }:
+        {
+          treefmt = {
+            projectRootFile = "flake.nix";
 
-          programs.alejandra.enable = true;
-          programs.deadnix.enable = true;
-          programs.prettier.enable = true;
+            programs.nixfmt.enable = true;
+            programs.nixfmt.package = pkgs.nixfmt-rfc-style;
+            programs.deadnix.enable = true;
+            programs.statix.enable = true;
+            programs.prettier.enable = true;
+          };
         };
-      };
     };
 }

@@ -1,11 +1,9 @@
-{
-  config,
-  lib,
-  ...
-}: let
-  hotwireLib = import ./../../lib.nix {inherit lib;};
+{ config, lib, ... }:
+let
+  hotwireLib = import ./../../lib.nix { inherit lib; };
   cfg = config.hotwire.overlays;
-in {
+in
+{
   options.hotwire.overlays = {
     enable = lib.mkEnableOption "hotwire overlays";
     generatePackagesOverlay = lib.mkOption {
@@ -17,31 +15,29 @@ in {
   };
 
   config = lib.mkMerge [
-    (lib.mkIf config.hotwire.enable {
-      hotwire.overlays.enable = lib.mkDefault true;
-    })
-    (lib.mkIf cfg.enable (lib.mkMerge [
-      {
-        flake.overlays =
-          builtins.mapAttrs (_: import)
-          (hotwireLib.nixFiles (config.hotwire.basePath + "/overlays"));
-      }
-      /*
-         For some reason this causes infinite recursion in NixOS configurations but the other implementation doesn't
-      (lib.mkIf cfg.generatePackagesOverlay {
-        flake.overlays.packages = (_: prev:
-          config.flake.packages."${prev.system}"
-        );
-      })
-      */
-      (lib.mkIf cfg.generatePackagesOverlay {
-        flake.overlays.packages = (
-          final: _:
-            builtins.mapAttrs
-            (_name: file: final.callPackage file {})
-            (hotwireLib.nixFiles (config.hotwire.basePath + "/packages"))
-        );
-      })
-    ]))
+    (lib.mkIf config.hotwire.enable { hotwire.overlays.enable = lib.mkDefault true; })
+    (lib.mkIf cfg.enable (
+      lib.mkMerge [
+        {
+          flake.overlays = builtins.mapAttrs (_: import) (
+            hotwireLib.nixFiles (config.hotwire.basePath + "/overlays")
+          );
+        }
+        /* For some reason this causes infinite recursion in NixOS configurations but the other implementation doesn't
+           (lib.mkIf cfg.generatePackagesOverlay {
+             flake.overlays.packages = (_: prev:
+               config.flake.packages."${prev.system}"
+             );
+           })
+        */
+        (lib.mkIf cfg.generatePackagesOverlay {
+          flake.overlays.packages =
+            final: _:
+            builtins.mapAttrs (_name: file: final.callPackage file { }) (
+              hotwireLib.nixFiles (config.hotwire.basePath + "/packages")
+            );
+        })
+      ]
+    ))
   ];
 }

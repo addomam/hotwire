@@ -3,10 +3,12 @@
   lib,
   inputs,
   ...
-}: let
-  hotwireLib = import ./../../lib.nix {inherit lib;};
+}:
+let
+  hotwireLib = import ./../../lib.nix { inherit lib; };
   cfg = config.hotwire.darwinConfigurations;
-in {
+in
+{
   options.hotwire.darwinConfigurations = {
     enable = lib.mkEnableOption "hotwire darwinConfigurations";
     importSelfModules = lib.mkOption {
@@ -17,7 +19,7 @@ in {
     };
     extraModules = lib.mkOption {
       type = lib.types.listOf lib.types.deferredModule;
-      default = [];
+      default = [ ];
       example = "[homeManager.darwinModule]";
       description = "Additional modules to add to the configurations.";
     };
@@ -30,28 +32,25 @@ in {
     globalModules = lib.mkOption {
       description = "The collection of modules to include in every configuration.";
       type = lib.types.listOf lib.types.deferredModule;
-      default = [];
+      default = [ ];
       internal = true;
       visible = false;
     };
   };
 
   config = lib.mkMerge [
-    (lib.mkIf config.hotwire.enable {
-      hotwire.darwinConfigurations.enable = lib.mkDefault true;
-    })
+    (lib.mkIf config.hotwire.enable { hotwire.darwinConfigurations.enable = lib.mkDefault true; })
     (lib.mkIf cfg.enable {
       hotwire.darwinConfigurations.globalModules = lib.mkMerge [
         cfg.extraModules
         (lib.mkIf cfg.importSelfModules (builtins.attrValues config.flake.darwinModules))
-        (lib.mkIf cfg.overlaySelfPackages [{nixpkgs.overlays = [config.flake.overlays.packages];}])
+        (lib.mkIf cfg.overlaySelfPackages [ { nixpkgs.overlays = [ config.flake.overlays.packages ]; } ])
       ];
 
-      flake.darwinConfigurations = builtins.mapAttrs (_: file:
-        inputs.darwin.lib.darwinSystem {
-          modules = [file] ++ cfg.globalModules;
-        })
-      (hotwireLib.nixFiles (config.hotwire.basePath + "/darwin-configurations"));
+      flake.darwinConfigurations =
+        builtins.mapAttrs
+          (_: file: inputs.darwin.lib.darwinSystem { modules = [ file ] ++ cfg.globalModules; })
+          (hotwireLib.nixFiles (config.hotwire.basePath + "/darwin-configurations"));
     })
   ];
 }

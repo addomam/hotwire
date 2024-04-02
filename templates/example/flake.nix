@@ -16,25 +16,25 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
   };
 
-  outputs = inputs @ {
-    flakeParts,
-    hotwire,
-    ...
-  }:
-    flakeParts.lib.mkFlake {inherit inputs;} ({...}: {
-      imports = [
-        hotwire.flakeModules.hotwire
-        hotwire.flakeModules.darwinOutputs
-        hotwire.flakeModules.homeManagerOutputs
-      ];
+  outputs =
+    inputs@{ flakeParts, hotwire, ... }:
+    flakeParts.lib.mkFlake { inherit inputs; } (
+      { ... }:
+      {
+        imports = [
+          hotwire.flakeModules.hotwire
+          hotwire.flakeModules.darwinOutputs
+          hotwire.flakeModules.homeManagerOutputs
+        ];
 
-      systems = [
-        "x86_64-linux"
-        "aarch64-linux"
-        "x86_64-darwin"
-        "aarch64-darwin"
-      ];
+        systems = [
+          "x86_64-linux"
+          "aarch64-linux"
+          "x86_64-darwin"
+          "aarch64-darwin"
+        ];
 
-      hotwire.enable = true;
-    });
+        hotwire.enable = true;
+      }
+    );
 }
