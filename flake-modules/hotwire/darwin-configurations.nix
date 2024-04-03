@@ -47,10 +47,9 @@ in
         (lib.mkIf cfg.overlaySelfPackages [ { nixpkgs.overlays = [ config.flake.overlays.packages ]; } ])
       ];
 
-      flake.darwinConfigurations =
-        builtins.mapAttrs
-          (_: file: inputs.darwin.lib.darwinSystem { modules = [ file ] ++ cfg.globalModules; })
-          (hotwireLib.nixFiles (config.hotwire.basePath + "/darwin-configurations"));
+      flake.darwinConfigurations = builtins.mapAttrs (
+        _: file: inputs.darwin.lib.darwinSystem { modules = [ file ] ++ cfg.globalModules; }
+      ) (hotwireLib.nixFiles (config.hotwire.basePath + "/darwin-configurations"));
     })
   ];
 }

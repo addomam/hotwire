@@ -47,13 +47,10 @@ in
         (lib.mkIf cfg.overlaySelfPackages [ { nixpkgs.overlays = [ config.flake.overlays.packages ]; } ])
       ];
 
-      flake.homeConfigurations =
-        builtins.mapAttrs
-          (
-            _: file:
-            inputs.homeManager.lib.homeManagerConfiguration { modules = [ file ] ++ cfg.globalModules; }
-          )
-          (hotwireLib.nixFiles (config.hotwire.basePath + "/home-configurations"));
+      flake.homeConfigurations = builtins.mapAttrs (
+        _: file:
+        inputs.homeManager.lib.homeManagerConfiguration { modules = [ file ] ++ cfg.globalModules; }
+      ) (hotwireLib.nixFiles (config.hotwire.basePath + "/home-configurations"));
     })
   ];
 }

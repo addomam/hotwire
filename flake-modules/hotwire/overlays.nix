@@ -23,12 +23,13 @@ in
             hotwireLib.nixFiles (config.hotwire.basePath + "/overlays")
           );
         }
-        /* For some reason this causes infinite recursion in NixOS configurations but the other implementation doesn't
-           (lib.mkIf cfg.generatePackagesOverlay {
-             flake.overlays.packages = (_: prev:
-               config.flake.packages."${prev.system}"
-             );
-           })
+        /*
+          For some reason this causes infinite recursion in NixOS configurations but the other implementation doesn't
+          (lib.mkIf cfg.generatePackagesOverlay {
+            flake.overlays.packages = (_: prev:
+              config.flake.packages."${prev.system}"
+            );
+          })
         */
         (lib.mkIf cfg.generatePackagesOverlay {
           flake.overlays.packages =

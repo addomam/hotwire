@@ -42,9 +42,9 @@ in
         (lib.mkIf cfg.overlaySelfPackages [ { nixpkgs.overlays = [ config.flake.overlays.packages ]; } ])
       ];
 
-      flake.nixosConfigurations =
-        builtins.mapAttrs (_: file: lib.nixosSystem { modules = [ file ] ++ cfg.globalModules; })
-          (hotwireLib.nixFiles (config.hotwire.basePath + "/nixos-configurations"));
+      flake.nixosConfigurations = builtins.mapAttrs (
+        _: file: lib.nixosSystem { modules = [ file ] ++ cfg.globalModules; }
+      ) (hotwireLib.nixFiles (config.hotwire.basePath + "/nixos-configurations"));
     })
   ];
 }
