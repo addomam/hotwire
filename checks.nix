@@ -1,5 +1,4 @@
 {
-  self,
   config,
   inputs,
   flake-parts-lib,
@@ -11,26 +10,32 @@ let
       inherit (config.flake) flakeModules;
     };
   };
-  exampleFlake = flake-parts-lib.mkFlake { inputs = allInputs; } (
-    { inputs, ... }:
-    {
-      imports = [
-        inputs.hotwire.flakeModules.hotwire
-        inputs.hotwire.flakeModules.darwinOutputs
-        inputs.hotwire.flakeModules.homeManagerOutputs
-      ];
+  exampleFlake =
+    flake-parts-lib.mkFlake
+      {
+        inputs = allInputs;
+        moduleLocation = ./templates/example;
+      }
+      (
+        { inputs, moduleLocation, ... }:
+        {
+          imports = [
+            inputs.hotwire.flakeModules.hotwire
+            inputs.hotwire.flakeModules.darwinOutputs
+            inputs.hotwire.flakeModules.homeManagerOutputs
+          ];
 
-      systems = [
-        "x86_64-linux"
-        "aarch64-linux"
-        "x86_64-darwin"
-        "aarch64-darwin"
-      ];
+          systems = [
+            "x86_64-linux"
+            "aarch64-linux"
+            "x86_64-darwin"
+            "aarch64-darwin"
+          ];
 
-      hotwire.enable = true;
-      hotwire.basePath = self.outPath + "/templates/example";
-    }
-  );
+          hotwire.enable = true;
+          hotwire.basePath = moduleLocation;
+        }
+      );
 in
 {
   flake.checks = {

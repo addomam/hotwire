@@ -1,4 +1,4 @@
-{ lib, self, ... }:
+{ lib, moduleLocation, ... }:
 {
   imports = [
     ./apps.nix
@@ -21,7 +21,7 @@
 
     basePath = lib.mkOption {
       type = lib.types.pathInStore;
-      default = self.outPath;
+      default = moduleLocation;
       description = "The absolute base path to the nix files";
     };
   };
