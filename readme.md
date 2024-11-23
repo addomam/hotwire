@@ -6,6 +6,29 @@ Automatically wire up well-formatted Nix files to flake outputs.
 
 This repository provides a flake module (for use with [flake.parts](https://flake.parts)). When enabled (`hotwire.enable = true`), this module will attempt to locate Nix files in your repository relevant to any flake outputs. Depending on the relevant output, the Nix files will be passed to the appropriate function before being added as flake output (e.g. `callPackage` for packages, `nixpkgs.lib.nixosSystem` for NixOS configurations, etc).
 
+## Implementation Status
+**WARNING: All of this is subject to change.**
+
+Here is an overview of current progress:
+
+|    Implemented     |       Tested       | Output                 | `flake` or `perSystem` | Import Function                                          |
+| :----------------: | :----------------: | ---------------------- | ---------------------- | -------------------------------------------------------- |
+| :heavy_check_mark: |                    | `apps`                 | `perSystem`            | `file: pkgs.callPackage file {}`                         |
+|                    |                    | `checks`               | `perSystem`            |                                                          |
+| :heavy_check_mark: | :heavy_check_mark: | `darwinConfigurations` | `flake`                | `file: lib.darwinSystem {modules = [file];}`             |
+| :heavy_check_mark: | :heavy_check_mark: | `darwinModules`        | `flake`                | `import`                                                 |
+| :heavy_check_mark: |                    | `devShells`            | `perSystem`            | `file: pkgs.callPackage file {}`                         |
+| :heavy_check_mark: |                    | `flakeModules`         | `flake`                | `import`                                                 |
+| :heavy_check_mark: |                    | `formatter`            | `perSystem`            | `file: pkgs.callPackage file {}`                         |
+| :heavy_check_mark: |                    | `homeConfigurations`   | `flake`                | `file: lib.homeManagerConfiguration {modules = [file];}` |
+| :heavy_check_mark: |                    | `homeModules`          | `flake`                | `import`                                                 |
+| :heavy_check_mark: |                    | `lib`                  | `flake`                | `file: import file {inherit lib;}`                       |
+|                    |                    | `legacyPackages`       | `perSystem`            |                                                          |
+| :heavy_check_mark: |                    | `nixosConfigurations`  | `flake`                | `file: lib.nixosSystem {modules = [file];}`              |
+| :heavy_check_mark: |                    | `nixosModules`         | `flake`                | `import`                                                 |
+| :heavy_check_mark: | :heavy_check_mark: | `overlays`             | `flake`                | `import`                                                 |
+| :heavy_check_mark: | :heavy_check_mark: | `packages`             | `perSystem`            | `file: pkgs.callPackage file {}`                         |
+
 ## Example `flake.nix`
 
 ```nix
@@ -36,22 +59,6 @@ This repository provides a flake module (for use with [flake.parts](https://flak
 
 That's all that's required in the `flake.nix` for this to work. The expected format and locations of the rest of the files are described below.
 
-## Conventions
-
-### Naming
-
-This module was written to follow the [upstream nixpkgs convention](https://github.com/NixOS/nixpkgs/blob/master/CONTRIBUTING.md#code-conventions) that file names are `kebab-case` and Nix values are `lowerCamelCase`. If your files follow this convention and are in `kebab-case`, your flake outputs will automatically be converted to `lowerCamelCase`. For example, if you have a package in `packages/my-cool-package.nix` or `packages/my-cool-package/default.nix`, the corresponding flake output will be `.#packages.myCoolPackage`.
-
-### Directory Structure
-
-This module expects to find a directory structure largely resembling the structure of a flake's outputs. For instance, it expects to find files for the `nixosConfigurations` output in the `nixos-configurations` directory. In an output's directory, every file with a `.nix` extension and directory containing a `default.nix` file is expected to correspond to an output. For files or directories that satisfy those conditions, the corresponding output's name will be based on the source's name as described above in [naming](#naming).
-
-For more details on how a specific output is handled, see it's section below.
-
-### Modules Default to Disabled
-
-This module will default to automatically importing all modules into your configurations. As such, you should gate your modules' functionality behind an `enable` option. This ensures all modules can be automatically imported without issue and the desired behavior can be explicitly enabled.
-
 ## Flake Options
 
 - `hotwire.enable`
@@ -70,29 +77,23 @@ This module will default to automatically importing all modules into your config
 
   A list of additional modules that will be added to the `imports` list for every configuration.
 
-## Outputs
+## Conventions
 
-**WARNING: All of this is subject to change.**
+### Naming
 
-Here is an overview of current progress:
+This module was written to follow the [upstream nixpkgs convention](https://github.com/NixOS/nixpkgs/blob/master/CONTRIBUTING.md#code-conventions) that file names are `kebab-case` and Nix values are `lowerCamelCase`. If your files follow this convention and are in `kebab-case`, your flake outputs will automatically be converted to `lowerCamelCase`. For example, if you have a package in `packages/my-cool-package.nix` or `packages/my-cool-package/default.nix`, the corresponding flake output will be `.#packages.myCoolPackage`.
 
-|    Implemented     |       Tested       | Output                 | `flake` or `perSystem` | Import Function                                          |
-| :----------------: | :----------------: | ---------------------- | ---------------------- | -------------------------------------------------------- |
-| :heavy_check_mark: |                    | `apps`                 | `perSystem`            | `file: pkgs.callPackage file {}`                         |
-|                    |                    | `checks`               | `perSystem`            |                                                          |
-| :heavy_check_mark: |                    | `darwinConfigurations` | `flake`                | `file: lib.darwinSystem {modules = [file];}`             |
-| :heavy_check_mark: |                    | `darwinModules`        | `flake`                | `import`                                                 |
-| :heavy_check_mark: |                    | `devShells`            | `perSystem`            | `file: pkgs.callPackage file {}`                         |
-| :heavy_check_mark: |                    | `flakeModules`         | `flake`                | `import`                                                 |
-| :heavy_check_mark: |                    | `formatter`            | `perSystem`            | `file: pkgs.callPackage file {}`                         |
-| :heavy_check_mark: |                    | `homeConfigurations`   | `flake`                | `file: lib.homeManagerConfiguration {modules = [file];}` |
-| :heavy_check_mark: |                    | `homeModules`          | `flake`                | `import`                                                 |
-| :heavy_check_mark: |                    | `lib`                  | `flake`                | `file: import file {inherit lib;}`                       |
-|                    |                    | `legacyPackages`       | `perSystem`            |                                                          |
-| :heavy_check_mark: |                    | `nixosConfigurations`  | `flake`                | `file: lib.nixosSystem {modules = [file];}`              |
-| :heavy_check_mark: |                    | `nixosModules`         | `flake`                | `import`                                                 |
-| :heavy_check_mark: |                    | `overlays`             | `flake`                | `import`                                                 |
-| :heavy_check_mark: | :heavy_check_mark: | `packages`             | `perSystem`            | `file: pkgs.callPackage file {}`                         |
+### Directory Structure
+
+This module expects to find a directory structure largely resembling the structure of a flake's outputs. For instance, it expects to find files for the `nixosConfigurations` output in the `nixos-configurations` directory. In an output's directory, every file with a `.nix` extension and directory containing a `default.nix` file is expected to correspond to an output. For files or directories that satisfy those conditions, the corresponding output's name will be based on the source's name as described above in [naming](#naming).
+
+For more details on how a specific output is handled, see it's section below.
+
+### Modules Default to Disabled
+
+This module will default to automatically importing all modules into your configurations. As such, you should gate your modules' functionality behind an `enable` option. This ensures all modules can be automatically imported without issue and the desired behavior can be explicitly enabled.
+
+## Output Documentation
 
 ### `.#apps`
 
