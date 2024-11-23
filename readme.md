@@ -4,7 +4,7 @@ Automatically wire up well-formatted Nix files to flake outputs.
 
 ## Description
 
-This repository provies a flake module (for use with [flake.parts](https://flake.parts)). When the corresponding option is enabled (`hotwire.enable = true`), this module will attempt to locate Nix files in your repository relevant to any flake outputs. Depending on the relevant output, the Nix files will be passed to the appropriate function before being added as flake output (e.g. `callPackage` for packages, `nixpkgs.lib.nixosSystem` for NixOS configurations, etc).
+This repository provides a flake module (for use with [flake.parts](https://flake.parts)). When enabled (`hotwire.enable = true`), this module will attempt to locate Nix files in your repository relevant to any flake outputs. Depending on the relevant output, the Nix files will be passed to the appropriate function before being added as flake output (e.g. `callPackage` for packages, `nixpkgs.lib.nixosSystem` for NixOS configurations, etc).
 
 ## Example `flake.nix`
 
@@ -23,10 +23,10 @@ This repository provies a flake module (for use with [flake.parts](https://flake
       imports = [hotwire.flakeModules.hotwire];
 
       systems = [
-        "x86_64-linux"
+        "aarch64-darwin"
         "aarch64-linux"
         "x86_64-darwin"
-        "aarch64-darwin"
+        "x86_64-linux"
       ];
 
       hotwire.enable = true;
@@ -34,17 +34,17 @@ This repository provies a flake module (for use with [flake.parts](https://flake
 }
 ```
 
-That's all that's requried in the `flake.nix` for this to work. The expected format and locations of the rest of the files are described below.
+That's all that's required in the `flake.nix` for this to work. The expected format and locations of the rest of the files are described below.
 
 ## Conventions
 
 ### Naming
 
-This module was written to follow the [upstream nixpkgs convention](https://github.com/NixOS/nixpkgs/blob/master/CONTRIBUTING.md#code-conventions) that file names are `kebab-case` and Nix values are `lowerCamelCase`. If your files follow this convention and are in `kebab-case`, your flake outputs will automatically be converted to `lowerCamelCase`. For example, if you have a package in `packages/my-cool-package.nix` or `packages/my-cool-package/default.nix`, the corresponding flake ouptput will be `.#packages.myCoolPackage`.
+This module was written to follow the [upstream nixpkgs convention](https://github.com/NixOS/nixpkgs/blob/master/CONTRIBUTING.md#code-conventions) that file names are `kebab-case` and Nix values are `lowerCamelCase`. If your files follow this convention and are in `kebab-case`, your flake outputs will automatically be converted to `lowerCamelCase`. For example, if you have a package in `packages/my-cool-package.nix` or `packages/my-cool-package/default.nix`, the corresponding flake output will be `.#packages.myCoolPackage`.
 
 ### Directory Structure
 
-This module expects to find a directory structure largely resembing the structure of a flake's outputs. For instance, it expects to find files for the `nixosConfigurations` output in the `nixos-configurations` directory. In an output's directory, every file with a `.nix` extension and directory containing a `default.nix` file is expected to correspond to an output. For files or directories that satisfy those conditions, the corresponding output's name will be based on the source's name as described above in [naming](#naming).
+This module expects to find a directory structure largely resembling the structure of a flake's outputs. For instance, it expects to find files for the `nixosConfigurations` output in the `nixos-configurations` directory. In an output's directory, every file with a `.nix` extension and directory containing a `default.nix` file is expected to correspond to an output. For files or directories that satisfy those conditions, the corresponding output's name will be based on the source's name as described above in [naming](#naming).
 
 For more details on how a specific output is handled, see it's section below.
 
@@ -98,14 +98,20 @@ Here is an overview of current progress:
 
 - Looks in the `apps` directory
 - Calls files with `callPackage`
-  - The flake's `.#pacakges` outputs are available
+  - The flake's `.#packages` outputs are available
 - I don't have a lot of experience with this output so if you use it and think a better interface would be more useful please reach out
 
 ### `.#darwinConfigurations`
 
 - Looks in the `darwin-configurations` directory
 - Calls files with nix-darwin's `lib.darwinSystem`
-  - Be sure to specify `nixpkgs.localSystem`
+  - Be sure to set `nixpkgs.localSystem` in your configuration
+  - The flake's `.#darwinModules` are automatically added to the imports for each configuration
+    - See [Modules Default to Disabled](#modules-default-to-disabled) for why that should be a fine default
+    - You can set `hotwire.darwinConfigurations.importSelfModules = false;` in your flake-parts config to disable this behavior.
+  - Automatically adds the flake's packages overlay (`.#overlays.packages`) to each configuration's nixpkgs.
+    - This overlay is automatically generated from all the packages in the flake by default. See [`.#overlays`](#overlays) for details.
+    - To disable adding the overlay to each NixOS configuration, set `hotwire.darwinConfigurations.overlaySelfPackages = false;` in your flake-parts configuration.
 
 ### `.#darwinModules`
 
@@ -134,6 +140,12 @@ Here is an overview of current progress:
 - Looks in the `home-configurations` directory
 - Calls configurations with Home Manager's `lib.homeManagerConfiguration`
   - Be sure to specify `nixpkgs.localSystem`
+  - Automatically adds all modules in flake's `.#homeModules` to each configuration's imports
+    - See [Modules Default to Disabled](#modules-default-to-disabled) for why that should be a fine default
+    - Set `hotwire.homeConfigurations.importSelfModules = false;` in your flake-parts configuration to disable this behavior.
+  - Automatically adds the flake's packages overlay (`.#overlays.packages`) to each configuration's nixpkgs.
+    - This overlay is automatically generated from all the packages in the flake by default. See [`.#overlays`](#overlays) for details.
+    - To disable adding the overlay to each NixOS configuration, set `hotwire.homeConfigurations.overlaySelfPackages = false;` in your flake-parts configuration.
 
 ### `.#homeModules`
 
@@ -152,6 +164,12 @@ Here is an overview of current progress:
 - Expects the files to be in the same format as `configuration.nix`, i.e. a NixOS module
   - Be sure to specify `nixpkgs.localSystem`
 - Calls these files with `nixpkgs.lib.nixosSystem`
+  - Automatically adds all modules in flake's `.#nixosModules` to each configuration's imports
+    - See [Modules Default to Disabled](#modules-default-to-disabled) for why that should be a fine default
+    - Set `hotwire.nixosConfigurations.importSelfModules = false;` in your flake-parts configuration to disable this behavior.
+  - Automatically adds the flake's packages overlay (`.#overlays.packages`) to each configuration's nixpkgs.
+    - This overlay is automatically generated from all the packages in the flake by default. See [`.#overlays`](#overlays) for details.
+    - To disable adding the overlay to each NixOS configuration, set `hotwire.nixosConfigurations.overlaySelfPackages = false;` in your flake-parts configuration.
 
 ### `.#nixosModules`
 
@@ -162,6 +180,8 @@ Here is an overview of current progress:
 
 - Looks in the `overlays` directory
 - Expects files to be overlays
+- By default, `.#overlays.packages` is created and adds all the flake's packages (`.#packages.${system}`) to the base package set
+  - Set `hotwire.overlays.generatePackagesOverlay = false;` in your flake-parts configuration to disable this behavior.
 
 ### `.#packages`
 

@@ -19,7 +19,7 @@
   outputs =
     inputs@{ flakeParts, hotwire, ... }:
     flakeParts.lib.mkFlake { inherit inputs; } (
-      { ... }:
+      { config, ... }:
       {
         imports = [
           hotwire.flakeModules.hotwire
@@ -28,13 +28,34 @@
         ];
 
         systems = [
-          "x86_64-linux"
+          "aarch64-darwin"
           "aarch64-linux"
           "x86_64-darwin"
-          "aarch64-darwin"
+          "x86_64-linux"
         ];
 
         hotwire.enable = true;
+
+        flake = {
+          checks = {
+            aarch64-darwin = {
+              darwinConfiguration = config.flake.darwinConfigurations.appleSilicon.config.system.build.toplevel;
+              homeConfiguration = config.flake.homeConfigurations.appleSilicon.config.system.build.toplevel;
+            };
+            aarch64-linux = {
+              homeConfiguration = config.flake.homeConfigurations.arm.config.system.build.toplevel;
+              nixosConfiguration = config.flake.nixosConfigurations.arm.config.system.build.toplevel;
+            };
+            x86_64-darwin = {
+              darwinConfiguration = config.flake.darwinConfigurations.intel.config.system.build.toplevel;
+              homeConfiguration = config.flake.homeConfigurations.intelMac.config.system.build.toplevel;
+            };
+            x86_64-linux = {
+              homeConfiguration = config.flake.homeConfigurations.intelLinux.config.system.build.toplevel;
+              nixosConfiguration = config.flake.nixosConfigurations.intel.config.system.build.toplevel;
+            };
+          };
+        };
       }
     );
 }

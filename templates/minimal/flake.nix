@@ -1,9 +1,11 @@
 {
   inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+
     hotwire.url = "github:addomam/hotwire";
+    hotwire.inputs.nixpkgs.follows = "nixpkgs";
 
     flakeParts.follows = "hotwire/flakeParts";
-    nixpkgs.follows = "hotwire/nixpkgs";
   };
 
   outputs =
