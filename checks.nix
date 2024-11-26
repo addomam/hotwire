@@ -1,81 +1,63 @@
 {
-  config,
   inputs,
-  flake-parts-lib,
+  self,
+  lib,
   ...
 }:
 let
-  allInputs = inputs // {
-    hotwire = {
-      inherit (config.flake) flakeModules;
-    };
+  availableInputs = inputs // {
+    hotwire = self;
   };
-  templatesExample =
-    flake-parts-lib.mkFlake
-      {
-        inputs = allInputs;
-        moduleLocation = ./templates/example;
-      }
-      (
-        {
-          inputs,
-          moduleLocation,
-          config,
-          ...
-        }:
-        {
-          imports = [
-            inputs.hotwire.flakeModules.hotwire
-            inputs.hotwire.flakeModules.darwinOutputs
-            inputs.hotwire.flakeModules.homeManagerOutputs
-          ];
-
-          systems = [
-            "aarch64-darwin"
-            "aarch64-linux"
-            "x86_64-darwin"
-            "x86_64-linux"
-          ];
-
-          hotwire.enable = true;
-          hotwire.basePath = moduleLocation;
-
-          flake = {
-            checks = {
-              aarch64-darwin = {
-                darwinConfiguration = config.flake.darwinConfigurations.appleSilicon.config.system.build.toplevel;
-                homeConfiguration = config.flake.homeConfigurations.appleSilicon.config.system.build.toplevel;
-              };
-              aarch64-linux = {
-                homeConfiguration = config.flake.homeConfigurations.arm.config.system.build.toplevel;
-                nixosConfiguration = config.flake.nixosConfigurations.arm.config.system.build.toplevel;
-              };
-              x86_64-darwin = {
-                darwinConfiguration = config.flake.darwinConfigurations.intel.config.system.build.toplevel;
-                homeConfiguration = config.flake.homeConfigurations.intelMac.config.system.build.toplevel;
-              };
-              x86_64-linux = {
-                homeConfiguration = config.flake.homeConfigurations.intelLinux.config.system.build.toplevel;
-                nixosConfiguration = config.flake.nixosConfigurations.intel.config.system.build.toplevel;
-              };
-            };
-          };
-        }
-      );
+  mkFlake =
+    path:
+    let
+      flake = import path;
+      flakeInputs = builtins.mapAttrs (name: _: availableInputs."${name}") flake.inputs;
+      flakeOutputs = flake.outputs (flakeInputs // { self = flakeOutputs; });
+    in
+    flakeOutputs;
 in
 {
-  flake.checks = {
-    x86_64-darwin.templatesExampleSystem =
-      templatesExample.darwinConfigurations.intel.config.system.build.toplevel;
-    aarch64-darwin.templatesExampleSystem =
-      templatesExample.darwinConfigurations.appleSilicon.config.system.build.toplevel;
-  };
-
-  perSystem =
-    { system, lib, ... }:
-    {
-      checks =
-        with lib.attrsets;
-        mapAttrs' (name: nameValuePair "templatesExample-${name}") templatesExample.checks."${system}";
-    };
+  flake.checks = lib.pipe ./templates [
+    builtins.readDir # -> { fileName = fileType; }
+    (lib.attrsets.filterAttrs (_: type: type == "directory")) # -> { templateName = "directory"; }
+    (lib.attrsets.mapAttrs (template: _: mkFlake ./templates/${template}/flake.nix)) # -> { templateName = templateFlake; }
+    (lib.attrsets.mapAttrs (_: flake: flake.checks)) # -> { templateName = templateFlake.checks; }
+    (lib.attrsets.mapAttrsToList (templateName: checks: { inherit templateName checks; })) # -> [{ templateName; checks = flakeChecks; }]
+    (lib.lists.concatMap (
+      { templateName, checks }:
+      lib.attrsets.mapAttrsToList (system: systemChecks: {
+        inherit templateName system systemChecks;
+      }) checks
+    )) # -> [{ templateName; system; systemChecks = {checkName = check;}; }]
+    (lib.lists.concatMap (
+      {
+        templateName,
+        system,
+        systemChecks,
+      }:
+      lib.attrsets.mapAttrsToList (checkName: check: {
+        inherit
+          templateName
+          system
+          checkName
+          check
+          ;
+      }) systemChecks
+    )) # -> [{templateName; system; checkName; check;}]
+    (builtins.map (
+      {
+        templateName,
+        system,
+        checkName,
+        check,
+      }:
+      {
+        "${system}" = {
+          "template-${templateName}_${checkName}" = check;
+        };
+      }
+    )) # -> [{system = {template-${templateName}_${checkName} = check;};}]
+    (builtins.foldl' lib.attrsets.recursiveUpdate { }) # -> {system = {template-${templateName}_${checkName} = check;};}
+  ];
 }

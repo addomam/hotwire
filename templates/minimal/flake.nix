@@ -14,5 +14,6 @@
       imports = [ hotwire.flakeModules.hotwire ];
       systems = [ "x86_64-linux" ];
       hotwire.enable = true;
+      hotwire.basePath = ./.;
     };
 }
