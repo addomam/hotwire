@@ -21,14 +21,18 @@ Here is an overview of current progress:
 | :heavy_check_mark: |                    | `devShells`            | `perSystem`            | `file: pkgs.callPackage file {}`                         |
 | :heavy_check_mark: |                    | `flakeModules`         | `flake`                | `import`                                                 |
 | :heavy_check_mark: |                    | `formatter`            | `perSystem`            | `file: pkgs.callPackage file {}`                         |
-| :heavy_check_mark: |                    | `homeConfigurations`   | `flake`                | `file: lib.homeManagerConfiguration {modules = [file];}` |
-| :heavy_check_mark: |                    | `homeModules`          | `flake`                | `import`                                                 |
+|      :x: [^1]      |                    | `homeConfigurations`   | `flake`                | `file: lib.homeManagerConfiguration {modules = [file];}` |
+|  :question: [^1]   |                    | `homeModules`          | `flake`                | `import`                                                 |
 | :heavy_check_mark: |                    | `lib`                  | `flake`                | `file: import file {inherit lib;}`                       |
 |                    |                    | `legacyPackages`       | `perSystem`            |                                                          |
-| :heavy_check_mark: |                    | `nixosConfigurations`  | `flake`                | `file: lib.nixosSystem {modules = [file];}`              |
-| :heavy_check_mark: |                    | `nixosModules`         | `flake`                | `import`                                                 |
+| :heavy_check_mark: |  :question: [^2]   | `nixosConfigurations`  | `flake`                | `file: lib.nixosSystem {modules = [file];}`              |
+| :heavy_check_mark: |  :question: [^2]   | `nixosModules`         | `flake`                | `import`                                                 |
 | :heavy_check_mark: | :heavy_check_mark: | `overlays`             | `flake`                | `import`                                                 |
 | :heavy_check_mark: | :heavy_check_mark: | `packages`             | `perSystem`            | `file: pkgs.callPackage file {}`                         |
+
+[^1]: Home manager (unlike NixOS and nix-darwin) requires a system-specific `pkgs` argument that I haven't found a way to generalize in a way that allows me to auto-import configurations.
+
+[^2]: I'm getting build errors on MacOS but that might just be my builder acting strange.
 
 ## Example `flake.nix`
 
