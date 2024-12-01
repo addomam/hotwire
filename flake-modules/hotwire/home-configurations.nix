@@ -39,7 +39,9 @@ in
   };
 
   config = lib.mkMerge [
-    (lib.mkIf config.hotwire.enable { hotwire.homeConfigurations.enable = lib.mkDefault true; })
+    # Disabling by default until Home Manager either has a nixpkgs.hostSystem
+    # option or until someone figures out how to set `pkgs` in a general way.
+    #(lib.mkIf config.hotwire.enable { hotwire.homeConfigurations.enable = lib.mkDefault true; })
     (lib.mkIf cfg.enable {
       hotwire.homeConfigurations.globalModules = lib.mkMerge [
         cfg.extraModules

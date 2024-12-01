@@ -30,7 +30,7 @@ This table covers current status of the project. Some things haven't been filled
 | :heavy_check_mark: | :heavy_check_mark: | `overlays`             | `flake`                | `import`                                                 |
 | :heavy_check_mark: | :heavy_check_mark: | `packages`             | `perSystem`            | `file: pkgs.callPackage file {}`                         |
 
-[^1]: Home manager (unlike NixOS and nix-darwin) requires a system-specific `pkgs` argument that I haven't found a way to generalize in a way that allows me to auto-import configurations.
+[^1]: See the section for [Home Manager configurations](#home-configurations) for details.
 
 [^2]: I'm getting build errors on MacOS but that might just be my builder acting strange.
 
@@ -141,7 +141,9 @@ This module will default to automatically importing all modules into your config
 - Calls this file with `callPackage`
   - The flake's `.#pacakges` outputs are available
 
-### `.#homeConfigurations`
+### `.#homeConfigurations` {#home-configurations}
+
+Home Manager configurations are not supported at the moment due to `homeManager.lib.homeManagerConfiguration` requiring a `pkgs` argument. Home Manager should automatically configure its `pkgs` like NixOS and nix-darwin do, via a `nixpkgs.hostSystem` argument, but doesn't, so I haven't found out a way to support it.
 
 - Looks in the `home-configurations` directory
 - Calls configurations with Home Manager's `lib.homeManagerConfiguration`
