@@ -4,13 +4,13 @@ Automatically wire up well-formatted Nix files to flake outputs.
 
 ## Description
 
-This repository provides a flake module (for use with [flake.parts](https://flake.parts)). When enabled (`hotwire.enable = true`), this module will attempt to locate Nix files in your repository relevant to any flake outputs. Depending on the relevant output, the Nix files will be passed to the appropriate function before being added as flake output (e.g. `callPackage` for packages, `nixpkgs.lib.nixosSystem` for NixOS configurations, etc).
+This repository provides a flake module (for use with [flake.parts](https://flake.parts)). When enabled (`hotwire.enable = true`), this module will attempt to locate Nix files in your repository relevant to any flake outputs. Depending on where files are found, the Nix files will be passed to the appropriate function before being added as flake output. See the following table for which outputs are implemented and what functions are used when setting up their flake outputs.
 
 ## Implementation Status
 
-**WARNING: All of this is subject to change.**
+**WARNING: This project is still undergoing heavy development and everything in this section is subject to change**
 
-Here is an overview of current progress:
+This table covers current status of the project. Some things haven't been filled out yet.
 
 |    Implemented     |       Tested       | Output                 | `flake` or `perSystem` | Import Function                                          |
 | :----------------: | :----------------: | ---------------------- | ---------------------- | -------------------------------------------------------- |
@@ -22,7 +22,7 @@ Here is an overview of current progress:
 | :heavy_check_mark: |                    | `flakeModules`         | `flake`                | `import`                                                 |
 | :heavy_check_mark: |                    | `formatter`            | `perSystem`            | `file: pkgs.callPackage file {}`                         |
 |      :x: [^1]      |                    | `homeConfigurations`   | `flake`                | `file: lib.homeManagerConfiguration {modules = [file];}` |
-|  :question: [^1]   |                    | `homeModules`          | `flake`                | `import`                                                 |
+| :heavy_check_mark: |                    | `homeModules`          | `flake`                | `import`                                                 |
 | :heavy_check_mark: |                    | `lib`                  | `flake`                | `file: import file {inherit lib;}`                       |
 |                    |                    | `legacyPackages`       | `perSystem`            |                                                          |
 | :heavy_check_mark: |  :question: [^2]   | `nixosConfigurations`  | `flake`                | `file: lib.nixosSystem {modules = [file];}`              |
@@ -62,7 +62,7 @@ Here is an overview of current progress:
 }
 ```
 
-That's all that's required in the `flake.nix` for this to work. The expected format and locations of the rest of the files are described below.
+That's all that's required in the `flake.nix` for this to work. There are some options you can pass to change certain things that Hotwire will try to do for you. Those options, as well as the expected format and locations of the everything, are described below.
 
 ## Flake Options
 
@@ -155,7 +155,7 @@ This module will default to automatically importing all modules into your config
 
 ### `.#homeModules`
 
-- Looks for modules and configurations in the `home-modules` and `home-configurations` directories respectively
+- Looks in the `home-modules` directory
 - Expects files to be Home Manager modules
 
 ### `.#lib`
