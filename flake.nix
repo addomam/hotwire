@@ -5,24 +5,24 @@
     darwin.url = "github:lnl7/nix-darwin";
     darwin.inputs.nixpkgs.follows = "nixpkgs";
 
+    devenv.url = "github:cachix/devenv";
+    devenv.inputs.nixpkgs.follows = "nixpkgs";
+
     flakeParts.url = "github:hercules-ci/flake-parts";
     flakeParts.inputs.nixpkgs-lib.follows = "nixpkgs";
 
     homeManager.url = "github:nix-community/home-manager";
     homeManager.inputs.nixpkgs.follows = "nixpkgs";
 
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-
-    treefmt.url = "github:numtide/treefmt-nix";
-    treefmt.inputs.nixpkgs.follows = "nixpkgs";
+    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
   };
 
   outputs =
-    inputs@{ flakeParts, ... }:
-    flakeParts.lib.mkFlake { inherit inputs; } {
+    inputs:
+    inputs.flakeParts.lib.mkFlake { inherit inputs; } {
       imports = [
-        inputs.treefmt.flakeModule
-        flakeParts.flakeModules.flakeModules
+        inputs.devenv.flakeModule
+        inputs.flakeParts.flakeModules.flakeModules
         ./checks.nix
       ];
 
@@ -57,18 +57,17 @@
         "aarch64-darwin"
       ];
 
-      perSystem =
-        { pkgs, ... }:
-        {
-          treefmt = {
-            projectRootFile = "flake.nix";
-
-            programs.nixfmt.enable = true;
-            programs.nixfmt.package = pkgs.nixfmt-rfc-style;
-            programs.deadnix.enable = true;
-            programs.statix.enable = true;
-            programs.prettier.enable = true;
+      perSystem = {
+        devenv.shells.default = {
+          languages.nix.enable = true;
+          starship.enable = true;
+          pre-commit.hooks = {
+            deadnix.enable = true;
+            nil.enable = true;
+            nixfmt-rfc-style.enable = true;
+            statix.enable = true;
           };
         };
+      };
     };
 }
