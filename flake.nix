@@ -18,11 +18,15 @@
   };
 
   outputs =
-    inputs:
-    inputs.flakeParts.lib.mkFlake { inherit inputs; } {
+    inputs@{
+      devenv,
+      flakeParts,
+      ...
+    }:
+    flakeParts.lib.mkFlake { inherit inputs; } {
       imports = [
-        inputs.devenv.flakeModule
-        inputs.flakeParts.flakeModules.flakeModules
+        devenv.flakeModule
+        flakeParts.flakeModules.flakeModules
         ./checks.nix
       ];
 
@@ -57,17 +61,25 @@
         "aarch64-darwin"
       ];
 
-      perSystem = {
-        devenv.shells.default = {
-          languages.nix.enable = true;
-          starship.enable = true;
-          pre-commit.hooks = {
-            deadnix.enable = true;
-            nil.enable = true;
-            nixfmt-rfc-style.enable = true;
-            statix.enable = true;
+      perSystem =
+        { lib, pkgs, ... }:
+        {
+          devenv.shells.default = {
+            languages.nix.enable = true;
+            starship.enable = true;
+            pre-commit.hooks = {
+              deadnix.enable = true;
+              nil.enable = true;
+              nixfmt-rfc-style.enable = true;
+              statix.enable = true;
+            };
+            containers.processes.derivation = pkgs.emptyDirectory;
+            containers.shell.derivation = pkgs.emptyDirectory;
+          };
+          packages = {
+            container-processes = lib.mkForce pkgs.emptyDirectory;
+            container-shell = lib.mkForce pkgs.emptyDirectory;
           };
         };
-      };
     };
 }
