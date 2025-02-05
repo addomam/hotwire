@@ -5,28 +5,33 @@
     darwin.url = "github:lnl7/nix-darwin";
     darwin.inputs.nixpkgs.follows = "nixpkgs";
 
-    devenv.url = "github:cachix/devenv";
-    devenv.inputs.nixpkgs.follows = "nixpkgs";
-
     flakeParts.url = "github:hercules-ci/flake-parts";
     flakeParts.inputs.nixpkgs-lib.follows = "nixpkgs";
+
+    gitHooks.url = "github:cachix/git-hooks.nix";
+    gitHooks.inputs.nixpkgs.follows = "nixpkgs";
 
     homeManager.url = "github:nix-community/home-manager";
     homeManager.inputs.nixpkgs.follows = "nixpkgs";
 
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+
+    treefmt.url = "github:numtide/treefmt-nix";
+    treefmt.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
     inputs@{
-      devenv,
       flakeParts,
+      gitHooks,
+      treefmt,
       ...
     }:
     flakeParts.lib.mkFlake { inherit inputs; } {
       imports = [
-        devenv.flakeModule
         flakeParts.flakeModules.flakeModules
+        gitHooks.flakeModule
+        treefmt.flakeModule
         ./checks.nix
       ];
 
@@ -62,23 +67,24 @@
       ];
 
       perSystem =
-        { lib, pkgs, ... }:
+        { config, pkgs, ... }:
         {
-          devenv.shells.default = {
-            languages.nix.enable = true;
-            starship.enable = true;
-            pre-commit.hooks = {
-              deadnix.enable = true;
-              nil.enable = true;
-              nixfmt-rfc-style.enable = true;
-              statix.enable = true;
-            };
-            containers.processes.derivation = pkgs.emptyDirectory;
-            containers.shell.derivation = pkgs.emptyDirectory;
+          treefmt = {
+            programs.nixfmt.enable = true;
           };
-          packages = {
-            container-processes = lib.mkForce pkgs.emptyDirectory;
-            container-shell = lib.mkForce pkgs.emptyDirectory;
+          pre-commit.settings.hooks = {
+            deadnix.enable = true;
+            nil.enable = true;
+            statix.enable = true;
+            treefmt.enable = true;
+          };
+          devShells.default = pkgs.mkShellNoCC {
+            shellHook = ''
+              ${config.pre-commit.installationScript}
+            '';
+            buildInputs = with pkgs; [
+              nixd
+            ];
           };
         };
     };
