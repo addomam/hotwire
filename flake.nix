@@ -82,9 +82,12 @@
             shellHook = ''
               ${config.pre-commit.installationScript}
             '';
-            buildInputs = with pkgs; [
-              nixd
-            ];
+            buildInputs =
+              with pkgs;
+              [
+                nixd
+              ]
+              ++ config.pre-commit.settings.enabledPackages;
           };
         };
     };
