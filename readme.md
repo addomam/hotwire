@@ -2,6 +2,8 @@
 
 Automatically wire up well-formatted Nix files to flake outputs.
 
+# ALERT: MAJOR REWRITE UNDERWAY!!!
+
 ## Description
 
 This repository provides a flake module (for use with [flake.parts](https://flake.parts)). When enabled (`hotwire.enable = true`), this module will attempt to locate Nix files in your repository relevant to any flake outputs. Depending on where files are found, the Nix files will be passed to the appropriate function before being added as flake output. See the following table for which outputs are implemented and what functions are used when setting up their flake outputs.
