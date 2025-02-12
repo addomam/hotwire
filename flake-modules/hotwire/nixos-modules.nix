@@ -9,7 +9,7 @@ in
     (lib.mkIf config.hotwire.enable { hotwire.nixosModules.enable = lib.mkDefault true; })
     (lib.mkIf config.hotwire.nixosModules.enable {
       flake.nixosModules = builtins.mapAttrs (_: import) (
-        hotwireLib.nixFiles (config.hotwire.basePath + "/nixos-modules")
+        hotwireLib.nixFiles (config.hotwire.basePath + /nixos-modules)
       );
     })
   ];

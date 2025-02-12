@@ -8,7 +8,7 @@ in
   config = lib.mkMerge [
     (lib.mkIf config.hotwire.enable { hotwire.darwinModules.enable = lib.mkDefault true; })
     (lib.mkIf config.hotwire.darwinModules.enable {
-      flake.darwinModules = hotwireLib.nixFiles (config.hotwire.basePath + "/darwin-modules");
+      flake.darwinModules = hotwireLib.nixFiles (config.hotwire.basePath + /darwin-modules);
     })
   ];
 }

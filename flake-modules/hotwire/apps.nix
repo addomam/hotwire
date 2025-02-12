@@ -12,7 +12,7 @@ in
         { pkgs, self', ... }:
         {
           apps = builtins.mapAttrs (_: file: pkgs.callPackage file self'.packages) (
-            hotwireLib.nixFiles (config.hotwire.basePath + "/apps")
+            hotwireLib.nixFiles (config.hotwire.basePath + /apps)
           );
         };
     })

@@ -8,8 +8,8 @@
       perSystem =
         { pkgs, self', ... }:
         let
-          dirPath = config.hotwire.basePath + "/formatter";
-          filePath = config.hotwire.basePath + "/formatter.nix";
+          dirPath = config.hotwire.basePath + /formatter;
+          filePath = config.hotwire.basePath + /formatter.nix;
           formatterPath =
             if builtins.pathExists dirPath then
               dirPath

@@ -8,7 +8,7 @@ in
   config = lib.mkMerge [
     (lib.mkIf config.hotwire.enable { hotwire.homeModules.enable = lib.mkDefault true; })
     (lib.mkIf config.hotwire.homeModules.enable {
-      flake.homeModules = hotwireLib.nixFiles (config.hotwire.basePath + "/home-modules");
+      flake.homeModules = hotwireLib.nixFiles (config.hotwire.basePath + /home-modules);
     })
   ];
 }

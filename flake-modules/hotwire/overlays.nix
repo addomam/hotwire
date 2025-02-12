@@ -20,7 +20,7 @@ in
       lib.mkMerge [
         {
           flake.overlays = builtins.mapAttrs (_: import) (
-            hotwireLib.nixFiles (config.hotwire.basePath + "/overlays")
+            hotwireLib.nixFiles (config.hotwire.basePath + /overlays)
           );
         }
         /*
@@ -35,7 +35,7 @@ in
           flake.overlays.packages =
             final: _:
             builtins.mapAttrs (_name: file: final.callPackage file { }) (
-              hotwireLib.nixFiles (config.hotwire.basePath + "/packages")
+              hotwireLib.nixFiles (config.hotwire.basePath + /packages)
             );
         })
       ]

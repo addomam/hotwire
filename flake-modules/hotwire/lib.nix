@@ -7,8 +7,8 @@
     (lib.mkIf config.hotwire.lib.enable {
       flake =
         let
-          dirPath = config.hotwire.basePath + "/lib";
-          filePath = config.hotwire.basePath + "/lib.nix";
+          dirPath = config.hotwire.basePath + /lib;
+          filePath = config.hotwire.basePath + /lib.nix;
           libPath =
             if builtins.pathExists dirPath then
               dirPath

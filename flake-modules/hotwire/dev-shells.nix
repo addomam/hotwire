@@ -12,7 +12,7 @@ in
         { pkgs, self', ... }:
         {
           devShells = builtins.mapAttrs (_: file: pkgs.callPackage file self'.packages) (
-            hotwireLib.nixFiles (config.hotwire.basePath + "/dev-shells")
+            hotwireLib.nixFiles (config.hotwire.basePath + /dev-shells)
           );
         };
     })

@@ -44,7 +44,7 @@ in
 
       flake.nixosConfigurations = builtins.mapAttrs (
         _: file: lib.nixosSystem { modules = [ file ] ++ cfg.globalModules; }
-      ) (hotwireLib.nixFiles (config.hotwire.basePath + "/nixos-configurations"));
+      ) (hotwireLib.nixFiles (config.hotwire.basePath + /nixos-configurations));
     })
   ];
 }

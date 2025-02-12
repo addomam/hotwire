@@ -49,7 +49,7 @@ in
 
       flake.darwinConfigurations = builtins.mapAttrs (
         _: file: inputs.darwin.lib.darwinSystem { modules = [ file ] ++ cfg.globalModules; }
-      ) (hotwireLib.nixFiles (config.hotwire.basePath + "/darwin-configurations"));
+      ) (hotwireLib.nixFiles (config.hotwire.basePath + /darwin-configurations));
     })
   ];
 }
