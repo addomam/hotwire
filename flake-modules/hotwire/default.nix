@@ -1,4 +1,4 @@
-{ lib, moduleLocation, ... }:
+{ lib, self, ... }:
 {
   imports = [
     ./apps.nix
@@ -20,8 +20,8 @@
     enable = lib.mkEnableOption "Hotwire, the convention over configuration flake module";
 
     basePath = lib.mkOption {
-      type = lib.types.pathInStore;
-      default = moduleLocation;
+      type = lib.types.path;
+      default = self;
       description = "The absolute base path to the nix files";
     };
   };
